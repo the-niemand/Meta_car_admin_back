@@ -10,10 +10,6 @@ router.use(express.json());
 
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '../images');
-        cb(null, uploadDir);
-    },
     filename: (req, file, cb) => {
         cb(null, file.originalname);
     },
@@ -53,25 +49,50 @@ router.get('/fetchCar/:id', async (req, res) => {
 
 
 
+// router.post('/createCar', upload.single('file'), async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({ error: 'No image uploaded' });
+//         }
+        
+//         const data = JSON.parse(req.body.data);
+//         const car = new CarsModel(data);
+//         const savedcar = await car.save();
+//         res.status(201).json({ data: savedcar });
+
+//     } catch (err) {
+//         if (err instanceof multer.MulterError) {
+//             return res.status(500).json({ error: 'Image upload failed' });
+//         }
+//         res.status(500).json({ error: err.message });
+//     }
+
+// });
+
+
+
 router.post('/createCar', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No image uploaded' });
         }
-        
+
+        const result = await cloudinary.uploader.upload(req.file.path);
+        const image = result.url;
         const data = JSON.parse(req.body.data);
+        data.image = image;
+
         const car = new CarsModel(data);
         const savedcar = await car.save();
         res.status(201).json({ data: savedcar });
-
     } catch (err) {
         if (err instanceof multer.MulterError) {
             return res.status(500).json({ error: 'Image upload failed' });
         }
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
-
 });
+
 
 
 
