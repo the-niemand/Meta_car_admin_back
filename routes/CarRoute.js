@@ -5,6 +5,7 @@ const multer = require("multer")
 const path = require('path');
 const fs = require('fs');
 router.use(express.json());
+const cloudinary = require('../utils/cloudinary');
 
 //multer
 
